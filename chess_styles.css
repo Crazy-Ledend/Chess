@@ -1,0 +1,252 @@
+/* Define Discord-like color variables for easier use */
+:root {
+    --discord-light-blue: #8f98ff; /* Standard Discord Blue */
+    --discord-blue: #5865F2; /* Standard Discord Blue */
+    --discord-dark-blue: #454FBC; /* Slightly darker for accents */
+    --discord-onyx: #2C2F33; /* Dark background, almost black */
+    --discord-dark-gray: #23272A; /* Even darker background for body */
+    --discord-light-gray: #424549; /* Lighter background for elements (dark squares) */
+    --discord-off-white: #F6F6F7; /* Text color */
+    --discord-green: #3BA55C; /* Success/valid move */
+    --discord-red: #ED4245; /* Error/check */
+}
+
+/* Base styles for a clean, elegant look */
+body {
+    font-family: 'Noto Sans', sans-serif;
+    background-color: var(--discord-dark-gray); /* Dark background for the entire page */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* min-height: 100vh; */
+    margin: 0;
+    /* overflow: hidden; */
+    color: var(--discord-off-white); /* Default text color */
+}
+.game-container {
+    display: flex;
+    background-color: var(--discord-light-gray); /* Main container background */
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6); /* Deeper, more spread shadow */
+    max-height: 566px;
+    /* overflow: hidden; */
+    border: 4px solid var(--discord-light-gray); /* Subtle border around entire game */
+}
+.chess-board {
+    background-color: var(--discord-onyx);
+    display: grid;
+    grid-template-columns: repeat(8, 70px);
+    grid-template-rows: repeat(8, 70px);
+    /* border: 2px solid var(--discord-blue); Distinct border for the chessboard itself */
+    box-shadow: inset 0 10px 40px rgba(0, 0, 0, 0.6); /* Inner shadow for depth */
+    border-radius: 10px; /* Slight radius to match container */
+    overflow: hidden; /* Ensures pieces don't stick out of border */
+}
+.square {
+    width: 70px;
+    height: 70px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    transition: background-color 0.2s ease;
+}
+.light {
+    background-color: rgba(255, 255, 255, 0.05); /* Very light, almost transparent white squares */
+    /* This will reveal the --discord-dark-gray body background or the --discord-onyx of the game-container */
+}
+.dark {
+    background-color: var(--discord-light-gray); /* Dark gray for dark squares */
+}
+.piece img {
+    width: 90%;
+    height: 90%;
+    object-fit: contain;
+    pointer-events: none;
+    filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.6)); /* More prominent shadow for pieces on dark bg */
+}
+.selected {
+    background-color: rgba(88, 101, 242, 0.4); /* Discord Blue for selected */
+    border-radius: 8px; /* Slightly rounded corners for selected piece */
+    box-shadow: inset 0 0 0 2px var(--discord-blue); /* Inner border for selection */
+}
+/* Translucent dot for valid moves */
+.valid-move::after {
+    content: '';
+    display: block;
+    width: 25px;
+    height: 25px;
+    background-color: #6b76f5; /* Discord Blue translucent dot */
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 8px rgba(59, 165, 92, 0.7);
+}
+/* When clicking on a valid move that has an opponent piece, show a ring instead of a dot */
+.valid-move.has-piece::after {
+    width: 60px;
+    height: 60px;
+    background-color: transparent;
+    border: 3px solid rgba(237, 66, 69, 0.7); /* Discord Red translucent ring for capture */
+    box-shadow: none;
+}
+
+.valid-move:hover {
+    filter: brightness(1.3); /* More noticeable hover effect */
+}
+.last-move-highlight {
+    background-color: rgba(88, 101, 242, 0.3); /* Muted Discord Blue for last move */
+}
+
+/* Move History and Controls Styling */
+.game-container {
+    /* display: flex; */
+    /* flex-direction: row; */
+    gap: 4px; /* Space between board and history */
+}
+.move-history {
+    width: 250px;
+    background-color: var(--discord-blue); /* Dark blue background for history */
+    padding: 50px;
+    border-radius: 10px;
+    /* border: 5px solid var(--discord-light-blue); Accent border */
+    display: flex;
+    flex-direction: column;
+    font-family: 'Inder', sans-serif; /* 'Inder' font for the log */
+    color: var(--discord-off-white);
+    /* Floating effect */
+    /* transform: translateY(-5px); Lift it slightly */
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7); /* Deeper shadow for floating */
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+/* Optional: Add a subtle hover to the move history container */
+.move-history:hover {
+    transform: scale(1.05);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+}
+
+.move-history h2 {
+    color: var(--discord-off-white);
+    font-weight: 700;
+    margin-bottom: 20px;
+    font-family: 'Noto Sans', sans-serif; /* Keep title consistent with main UI font */
+}
+#status {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 15px;
+    text-align: center;
+    color: var(--discord-off-white);
+    padding: 8px;
+    border-radius: 5px;
+    background-color: var(--discord-light-blue); /* Slightly transparent for status */
+    transition: ease-in;
+}
+#status.text-red-600 { /* This is the class applied for 'Check!' */
+    background-color: var(--discord-red);
+    color: var(--discord-off-white);
+    font-weight: 700;
+}
+.move-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    margin-bottom: 15px;
+    list-style: none;
+    padding: 0;
+    font-size: 0.95rem;
+    color: var(--discord-off-white);
+}
+.move-list li {
+    padding: 6px 0;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.move-list li:last-child {
+    border-bottom: none;
+}
+
+.move-history ::-webkit-scrollbar {
+    width: 8px;
+    color: rgb(255, 255, 255);
+}
+
+.move-list span:first-child {
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.6);
+    min-width: 30px;
+}
+.move-list span:nth-child(2),
+.move-list span:nth-child(3) {
+    flex-grow: 1;
+    text-align: center;
+}
+.current-move {
+    font-weight: 700;
+    background-color: var(--discord-light-blue);
+    border-radius: 4px;
+    padding: 2px 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.controls button {
+    transition: all 0.2s ease;
+    font-weight: 500;
+    letter-spacing: 0.025em;
+    background-color: var(--discord-light-blue);
+    color: var(--discord-off-white);
+}
+.controls button:hover {
+    background-color: var(--discord-dark-blue);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Promotion Modal Styling */
+#promotionModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+.promotion-content {
+    background-color: var(--discord-onyx);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    border: 1px solid var(--discord-light-gray);
+    color: var(--discord-off-white);
+}
+.promotion-content h3 {
+    font-family: 'Noto Sans', sans-serif;
+    color: var(--discord-off-white);
+    margin-bottom: 20px;
+}
+.promotion-choices {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+}
+.promotion-choices .piece {
+    width: 70px;
+    height: 70px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background-color: var(--discord-light-gray); /* Background for promotion choice squares */
+}
+.promotion-choices .piece:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+}
